@@ -2,7 +2,7 @@
   "name": "juicebox",
   "description": "Scoped GitHub App wrapper for gh and git — manifest-bounded permissions instead of full OAuth.",
   "url": "https://github.com/kattebak/juicebox",
-  "public": false,
+  "public": true,
   "request_oauth_on_install": true,
   "redirect_url": "https://kattebak.github.io/juicebox/callback.html",
   "callback_urls": ["https://kattebak.github.io/juicebox/callback.html"],
