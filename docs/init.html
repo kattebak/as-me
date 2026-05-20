@@ -65,10 +65,10 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .
 
   <label class="field">Visibility</label>
   <div class="owner-radios">
-    <label><input type="radio" name="visibility" value="private" checked> Private</label>
-    <label><input type="radio" name="visibility" value="public"> Public</label>
+    <label><input type="radio" name="visibility" value="private"> Private</label>
+    <label><input type="radio" name="visibility" value="public" checked> Public</label>
   </div>
-  <p class="help"><strong>Private</strong> = the App can only be installed on the owner you picked above. Pick this if the App is for a single account. <strong>Public</strong> = installable on any account (yours or anyone else's), but each install is isolated to the installer's chosen repos and the permissions below still apply. Pick this if you want to install on multiple accounts you own (e.g. your personal account <em>and</em> an org). Private can be flipped to public later under <em>App settings → Advanced</em>; the reverse is one-way once anyone else has installed.</p>
+  <p class="help"><strong>Public</strong> = installable on any account (yours or anyone else's), but each install is isolated to the installer's chosen repos and the permissions below still apply. Pick this if you want to install on multiple accounts (e.g. your personal account <em>and</em> an org). <strong>Private</strong> = the App can only be installed on the owner you picked above. Pick this for single-tenant lockdown. Private → public is reversible later under <em>App settings → Advanced</em>; the reverse is one-way once anyone else has installed.</p>
 
   <div class="perms">
     <h3>Permissions granted</h3>
@@ -103,8 +103,8 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .
     validateOrg($('orgname').value);
   }
 
-  if (q.get('public') === '1') {
-    document.querySelector('input[name=visibility][value=public]').checked = true;
+  if (q.get('private') === '1') {
+    document.querySelector('input[name=visibility][value=private]').checked = true;
   }
 
   document.querySelectorAll('input[name=owner]').forEach((r) => {

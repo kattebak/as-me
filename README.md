@@ -54,11 +54,11 @@ REQUIRED before `juicebot login`:
 next: juicebot install
 ```
 
-Omit `--org` to create/install under your own account; pass `--org <name>` to target an org you administer. `init` defaults the App name to `${USER}-only` (e.g. `mvhenten-only`) so each install is single-tenant by convention; pass `--name <slug>` to override, or `--description <text>` for the description shown in GitHub's UI.
+Omit `--org` to create/install under your own account; pass `--org <name>` to target an org you administer. `init` defaults the App name to `${USER}-only` (e.g. `mvhenten-only`); pass `--name <slug>` to override, or `--description <text>` for the description shown in GitHub's UI.
 
-### Private vs public
+### Public vs private
 
-The wizard defaults the App to **private**: it can only be installed on the account that owns it. To install one App on multiple accounts you own (e.g., personal + an org), pick **Public** in the wizard or pass `--public` to `juicebot init`. Each installation is still isolated to the installer's chosen repos, and the manifest permissions still apply — "public" only affects who can install, not what an installation can do. You can switch private → public later under *App settings → Advanced → Make public*; the reverse is not possible once another account has installed.
+The wizard defaults the App to **public**: it can be installed on any account (yours or anyone else's), with each installation isolated to the installer's chosen repos and bounded by the manifest. Pick this if you want to install on multiple accounts (e.g., personal + an org you own). To lock the App to single-tenant (only the owning account can install), pick **Private** in the wizard or pass `--private` to `juicebot init`. Private → public is reversible later under *App settings → Advanced → Make public*; the reverse is one-way once anyone else has installed.
 
 After `init`, secrets live in `~/.config/juicebox/` (mode 0600). The private key is `private-key.pem`.
 
