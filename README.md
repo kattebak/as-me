@@ -8,10 +8,10 @@ LLM agents turn that API into a privilege-escalation surface. Anything an agent 
 
 ## How
 
-`juice-bot` is a scoped GitHub App wrapper for `gh` and `git`. It replaces `gh auth login` (full OAuth) with a GitHub App whose permissions are fixed by the manifest at `contents`, `pull_requests`, `issues`, `metadata`, and `statuses`. Single-user, POSIX `sh`, depends on `curl`, `jq`, `openssl`, `git`, and `gh`. Two modes:
+`juicebot` is a scoped GitHub App wrapper for `gh` and `git`. It replaces `gh auth login` (full OAuth) with a GitHub App whose permissions are fixed by the manifest at `contents`, `pull_requests`, `issues`, `metadata`, and `statuses`. Single-user, POSIX `sh`, depends on `curl`, `jq`, `openssl`, `git`, and `gh`. Two modes:
 
-- **Plain `gh` / `git`** (default): manifest-scoped user-to-server token, acts as the authenticated user. Existing commands — `gh pr create`, `gh issue list`, `gh api ...`, `git push` — work unmodified. The token is exported via `eval "$(juice-bot env)"` for the shell and provided to git via `!juice-bot git-credential`.
-- **`juice-bot gh <args>`** (bot / on-behalf-of mode): installation token, acts as the App; prepends `🧃 created on behalf of @<login>` to body-bearing subcommands so reviewers and audit logs can identify agent-authored content.
+- **Plain `gh` / `git`** (default): manifest-scoped user-to-server token, acts as the authenticated user. Existing commands — `gh pr create`, `gh issue list`, `gh api ...`, `git push` — work unmodified. The token is exported via `eval "$(juicebot env)"` for the shell and provided to git via `!juicebot git-credential`.
+- **`juicebot gh <args>`** (bot / on-behalf-of mode): installation token, acts as the App; prepends `🧃 created on behalf of @<login>` to body-bearing subcommands so reviewers and audit logs can identify agent-authored content.
 
 ## Setup
 
@@ -19,20 +19,20 @@ LLM agents turn that API into a privilege-escalation surface. Anything an agent 
 curl -fsSL https://raw.githubusercontent.com/kattebak/juicebox/main/install.sh | bash
 ```
 
-Defaults install to `~/.local/share/juicebox` with `juice-bot` symlinked into `~/.local/bin`. Override via `JUICEBOX_HOME=` / `BIN_DIR=` env vars.
+Defaults install to `~/.local/share/juicebox` with `juicebot` symlinked into `~/.local/bin`. Override via `JUICEBOX_HOME=` / `BIN_DIR=` env vars.
 
 ```sh
-juice-bot init [--org <name>]                 # creates the GitHub App (manual paste by default)
-juice-bot install [--org <name>]              # installs it on a user or org account
-juice-bot login                               # user-to-server OAuth (device flow)
+juicebot init [--org <name>]                 # creates the GitHub App (manual paste by default)
+juicebot install [--org <name>]              # installs it on a user or org account
+juicebot login                               # user-to-server OAuth (device flow)
 ```
 
 `init` prints a URL to a hosted setup wizard at [kattebak.github.io/juicebox/init.html](https://kattebak.github.io/juicebox/init.html). Open it in any browser. The page lets you review the App name and owner, shows the permissions declared by the manifest, and submits to GitHub when you click **Create GitHub App**. GitHub redirects to a callback page that displays a code (also auto-copied to clipboard). Paste it into the CLI's `paste:` prompt. `install` works the same way via GitHub's install page.
 
-The flow requires no open port, no local browser, and no graphical environment on the machine running `juice-bot`. HTTPS end-to-end.
+The flow requires no open port, no local browser, and no graphical environment on the machine running `juicebot`. HTTPS end-to-end.
 
 ```text
-$ juice-bot init
+$ juicebot init
 open this URL in any browser to create your scoped GitHub App:
 
 https://kattebak.github.io/juicebox/init.html?name=mvhenten-only
@@ -46,19 +46,19 @@ paste: ████████████████████████�
 
 app created: https://github.com/settings/apps/mvhenten-only
 
-REQUIRED before `juice-bot login`:
+REQUIRED before `juicebot login`:
   1. open https://github.com/settings/apps/mvhenten-only
   2. scroll to 'Identifying and authorizing users'
   3. toggle 'Enable Device Flow' ON, click Save
 
-next: juice-bot install
+next: juicebot install
 ```
 
 Omit `--org` to create/install under your own account; pass `--org <name>` to target an org you administer. `init` defaults the App name to `${USER}-only` (e.g. `mvhenten-only`) so each install is single-tenant by convention; pass `--name <slug>` to override, or `--description <text>` for the description shown in GitHub's UI.
 
 ### Private vs public
 
-The wizard defaults the App to **private**: it can only be installed on the account that owns it. To install one App on multiple accounts you own (e.g., personal + an org), pick **Public** in the wizard or pass `--public` to `juice-bot init`. Each installation is still isolated to the installer's chosen repos, and the manifest permissions still apply — "public" only affects who can install, not what an installation can do. You can switch private → public later under *App settings → Advanced → Make public*; the reverse is not possible once another account has installed.
+The wizard defaults the App to **private**: it can only be installed on the account that owns it. To install one App on multiple accounts you own (e.g., personal + an org), pick **Public** in the wizard or pass `--public` to `juicebot init`. Each installation is still isolated to the installer's chosen repos, and the manifest permissions still apply — "public" only affects who can install, not what an installation can do. You can switch private → public later under *App settings → Advanced → Make public*; the reverse is not possible once another account has installed.
 
 After `init`, secrets live in `~/.config/juicebox/` (mode 0600). The private key is `private-key.pem`.
 
@@ -68,28 +68,28 @@ GitHub's App-manifest flow requires the manifest to be submitted as the body of 
 
 The page is two static HTML files at `docs/init.html` and `docs/callback.html`, served via GitHub Pages. They take no credentials and run no backend; the wizard builds the manifest JSON from the form fields and submits it to github.com directly.
 
-To avoid depending on `kattebak.github.io` (fork-and-host scenarios, air-gapped networks), fork this repo, enable Pages on your fork, and update `PAGES_BASE` in `bin/juice-bot` to your fork's URL.
+To avoid depending on `kattebak.github.io` (fork-and-host scenarios, air-gapped networks), fork this repo, enable Pages on your fork, and update `PAGES_BASE` in `bin/juicebot` to your fork's URL.
 
 ### Remote / headless machines
 
-The Pages flow works headless: run `juice-bot init` on the remote, open the URL on your laptop, paste the code back into the SSH session. To bootstrap on your laptop and copy the result over, only the state dir needs to move:
+The Pages flow works headless: run `juicebot init` on the remote, open the URL on your laptop, paste the code back into the SSH session. To bootstrap on your laptop and copy the result over, only the state dir needs to move:
 
 ```sh
 rsync -a ~/.config/juicebox/ remote:.config/juicebox/
-ssh remote juice-bot login
+ssh remote juicebot login
 ```
 
-The state dir holds App credentials + PEM (mode 0600); `juice-bot login` on the remote mints its own user token via device flow.
+The state dir holds App credentials + PEM (mode 0600); `juicebot login` on the remote mints its own user token via device flow.
 
 ## Claude Code skill
 
-The skill is at `skills/juicebox/SKILL.md` and is framework-agnostic; any agent runtime that reads SKILL-style markdown can point at it directly. The installer symlinks it into `~/.claude/skills/juicebox/` for Claude Code. In a fresh conversation, type `/juicebox` and the skill walks the agent through install → init → device-flow toggle → install → login → shell + git wiring → verify, using `juice-bot status` to determine the current step. Override the link target with `SKILL_DIR=…` to use a different location; users on other runtimes can ignore the symlink and point their runtime at the in-repo path.
+The skill is at `skills/juicebox/SKILL.md` and is framework-agnostic; any agent runtime that reads SKILL-style markdown can point at it directly. The installer symlinks it into `~/.claude/skills/juicebox/` for Claude Code. In a fresh conversation, type `/juicebox` and the skill walks the agent through install → init → device-flow toggle → install → login → shell + git wiring → verify, using `juicebot status` to determine the current step. Override the link target with `SKILL_DIR=…` to use a different location; users on other runtimes can ignore the symlink and point their runtime at the in-repo path.
 
 ## Daily use
 
 ```sh
-eval "$(juice-bot env)"                       # exports GH_TOKEN / GITHUB_TOKEN for this shell
-git config --global credential.https://github.com.helper '!juice-bot git-credential'
+eval "$(juicebot env)"                       # exports GH_TOKEN / GITHUB_TOKEN for this shell
+git config --global credential.https://github.com.helper '!juicebot git-credential'
 ```
 
 The credential helper auto-refreshes when the token is within 5 min of expiry.
@@ -97,13 +97,13 @@ The credential helper auto-refreshes when the token is within 5 min of expiry.
 ## Bot mode (a.k.a. 🧃 / on-behalf-of mode)
 
 ```sh
-juice-bot gh pr create --title "x" --body "y"   # body becomes "🧃 created on behalf of @<login>\n\ny"
-juice-bot gh issue comment 123 --body "ack"     # same prefix
+juicebot gh pr create --title "x" --body "y"   # body becomes "🧃 created on behalf of @<login>\n\ny"
+juicebot gh issue comment 123 --body "ack"     # same prefix
 ```
 
 The 🧃 prefix attributes the PR/issue/comment to the App rather than to you. Reviewers and audit logs can identify which PRs/issues/comments were agent-initiated.
 
-Bot mode picks the installation by reading the current repo's `origin` remote and looking up the owner in state. The 🧃 prefix is injected only into body-bearing `gh` subcommands (`pr create`, `issue create`, `pr comment`, `issue comment`, `pr review`); all other `gh` calls under `juice-bot gh` run unchanged with the installation token.
+Bot mode picks the installation by reading the current repo's `origin` remote and looking up the owner in state. The 🧃 prefix is injected only into body-bearing `gh` subcommands (`pr create`, `issue create`, `pr comment`, `issue comment`, `pr review`); all other `gh` calls under `juicebot gh` run unchanged with the installation token.
 
 ## Security model
 
@@ -111,33 +111,33 @@ The App's manifest declares its maximum permissions (write on contents/PRs/issue
 
 ## Org-side lockdown
 
-`juice-bot` constrains only one access path. The org still accepts OAuth-flow `gh` tokens and classic PATs by default, both of which carry your full account permissions. Restrict them under `Org → Settings → Third-party Access`:
+`juicebot` constrains only one access path. The org still accepts OAuth-flow `gh` tokens and classic PATs by default, both of which carry your full account permissions. Restrict them under `Org → Settings → Third-party Access`:
 
 1. **OAuth application policy → Setup application access restrictions.** Members can no longer connect arbitrary OAuth apps to org resources.
-2. **OAuth application policy → Approved OAuth Apps → "GitHub CLI" → Deny.** `gh auth login` (device flow) can no longer access the org. Members use `juice-bot` or an FG-PAT.
+2. **OAuth application policy → Approved OAuth Apps → "GitHub CLI" → Deny.** `gh auth login` (device flow) can no longer access the org. Members use `juicebot` or an FG-PAT.
 3. **Personal access tokens → Tokens (classic) → Restrict access.** Classic PATs are blocked against the org. They carry full account permissions and have no per-permission scoping.
 4. **Personal access tokens → Fine-grained tokens → Require administrator approval.** FG-PATs remain available for one-off human operations but require approval.
 5. **GitHub Apps → audit installed apps.** Uninstall anything with `administration` or `members` write that you do not recognize.
 
-After this, the remaining access paths are `juice-bot` (manifest-bounded), FG-PATs (approval-gated), and explicitly approved GitHub Apps. Migrate any classic-PAT automation before applying step 3; otherwise it will return 401.
+After this, the remaining access paths are `juicebot` (manifest-bounded), FG-PATs (approval-gated), and explicitly approved GitHub Apps. Migrate any classic-PAT automation before applying step 3; otherwise it will return 401.
 
 On Enterprise Cloud, set the same controls under `Enterprise → Policies → Personal access tokens` and `Enterprise → Policies → OAuth apps` so an org admin cannot relax them later.
 
 ## Commands
 
 ```
-juice-bot init [--org <name>]                   create App from manifest (hosted wizard + paste-back)
-juice-bot install [--org <name>]                install App, capture installation_id
-juice-bot login                                 user OAuth (refresh-capable, device flow)
-juice-bot env                                   print export lines for eval
-juice-bot git-credential <op>                   git credential helper protocol
-juice-bot gh <gh-args...>                      run gh as the App (🧃 / on-behalf-of mode)
-juice-bot status                                dump configured state
+juicebot init [--org <name>]                   create App from manifest (hosted wizard + paste-back)
+juicebot install [--org <name>]                install App, capture installation_id
+juicebot login                                 user OAuth (refresh-capable, device flow)
+juicebot env                                   print export lines for eval
+juicebot git-credential <op>                   git credential helper protocol
+juicebot gh <gh-args...>                      run gh as the App (🧃 / on-behalf-of mode)
+juicebot status                                dump configured state
 ```
 
 ## Files
 
-- `bin/juice-bot` — CLI (POSIX `sh` dispatch)
+- `bin/juicebot` — CLI (POSIX `sh` dispatch)
 - `lib/state.sh` — `~/.config/juicebox/state.json` I/O (set `JUICEBOX_STATE_DIR` to relocate for tests)
 - `lib/oauth.sh` — OAuth device flow + refresh + paste-back code/installation-id prompt
 - `lib/jwt.sh` — RS256 JWT (openssl) + installation token

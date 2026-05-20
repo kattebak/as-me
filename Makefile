@@ -2,7 +2,7 @@ SHELLCHECK ?= shellcheck
 
 SHELL_FILES := $(shell find . \
 	-type f \
-	\( -name '*.sh' -o -path './bin/juice-bot' \) \
+	\( -name '*.sh' -o -path './bin/juicebot' \) \
 	-not -path './node_modules/*' \
 	-not -path './.git/*' \
 	-not -path './.claude/*')
